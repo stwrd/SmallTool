@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Aug 02 00:01:40 2018
+照片中不存在门牌信息时，标注字段为None
+@author: Administrator
+"""
+
+import numpy as np
+import os
+
+def read_csv_file(file_name):   
+    fp = file(file_name)
+    lines = fp.readlines()
+    dict_value = {} 
+    for i,line in enumerate(lines):
+        if len(line) != 0:
+            split_line = (line.strip().split(' '))
+            if len(split_line) == 2:
+                dict_value[split_line[0]] = split_line[1]
+            else:
+                print 'line num less than 2 in %05d:' %i, line
+        else:
+            print 'line is empty in %05d:' %i,line
+    return dict_value
+
+def compare_csv_file(anno_file, pre_file):
+    anno_dict = read_csv_file(anno_file)
+    pre_dict = read_csv_file(pre_file)
+    COR = 0#选手识别准确的门牌的数量
+    ANNO = 0#标注门牌不为空的数量
+    PRE = 0#选手识别到的不为空的门牌的数量
+    for key in anno_dict:
+        anno_label = anno_dict[key]
+        if anno_label != 'None':#标注门牌不为空
+            ANNO += 1
+        if pre_dict.has_key(key):
+            pre_label = pre_dict[key]
+            if pre_label != 'None':
+                PRE += 1
+                if pre_label == anno_label:
+                    COR += 1
+    precision = float(COR)/PRE
+    recall = float(COR)/ANNO
+    f1 = 2*recall*precision/(recall + precision)
+    return f1
